@@ -197,3 +197,43 @@ test('5. SQL Migrations & Security Audit: all 3 migrations enable RLS, use SHA-2
   assert.match(edgeFn, /function escapeHtml/i);
 });
 
+test('6. Medication & Appointment CRUD + Duplicate Dose Idempotency Verification', () => {
+  const serviceCode = fs.readFileSync(
+    path.resolve('src/services/careConnectService.js'),
+    'utf8'
+  );
+  const medsTabCode = fs.readFileSync(
+    path.resolve('src/components/dashboard/MedicationsTab.jsx'),
+    'utf8'
+  );
+  const aptsTabCode = fs.readFileSync(
+    path.resolve('src/components/dashboard/AppointmentsTab.jsx'),
+    'utf8'
+  );
+
+  assert.match(serviceCode, /export async function createMedicationInDb/);
+  assert.match(serviceCode, /export async function updateMedicationDetailsInDb/);
+  assert.match(serviceCode, /export async function deleteMedicationFromDb/);
+  assert.match(serviceCode, /export async function createAppointmentInDb/);
+  assert.match(serviceCode, /export async function updateAppointmentDetailsInDb/);
+  assert.match(serviceCode, /export async function deleteAppointmentFromDb/);
+  assert.match(medsTabCode, /onEditMedication/);
+  assert.match(aptsTabCode, /onEditAppointment/);
+});
+
+test('7. Production Deployment & Secret Protection Audit (netlify.toml, _redirects, .gitignore, .env.example)', () => {
+  const netlifyToml = fs.readFileSync(path.resolve('netlify.toml'), 'utf8');
+  const redirects = fs.readFileSync(path.resolve('public/_redirects'), 'utf8');
+  const gitignore = fs.readFileSync(path.resolve('.gitignore'), 'utf8');
+  const envExample = fs.readFileSync(path.resolve('.env.example'), 'utf8');
+
+  assert.match(netlifyToml, /command\s*=\s*"npm run build"/);
+  assert.match(netlifyToml, /publish\s*=\s*"dist"/);
+  assert.match(redirects, /\/\*\s+\/index\.html\s+200/);
+  assert.match(gitignore, /^\.env$/m);
+  assert.match(gitignore, /^dist$/m);
+  assert.match(gitignore, /^node_modules$/m);
+  assert.doesNotMatch(envExample, /service_role\s*=/i);
+});
+
+
