@@ -1,0 +1,9 @@
+node_modules
+.vite-cache
+dist
+dist-ssr
+*.local
+*.zip
+.env
+.env.*
+!.env.example
